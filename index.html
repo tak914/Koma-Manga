@@ -2,6 +2,7 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
+<meta name="referrer" content="no-referrer">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>KOMA — Lector de Manga</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -166,13 +167,14 @@
   .car-arrow{
     position:absolute; top:0; bottom:14px; width:36px;
     display:flex; align-items:center; justify-content:center;
-    background:linear-gradient(90deg, var(--bg) 30%, transparent);
+    background:none;
     border:none; color:var(--text); font-family:'Bebas Neue',sans-serif; font-size:1.6rem;
     cursor:pointer; z-index:2; opacity:.55; transition:opacity .15s;
+    text-shadow:0 1px 4px rgba(0,0,0,0.9), 0 0 10px rgba(0,0,0,0.6);
   }
   .carousel-wrap:hover .car-arrow{opacity:1;}
   .car-arrow.left{left:0;}
-  .car-arrow.right{right:0; background:linear-gradient(-90deg, var(--bg) 30%, transparent); justify-content:flex-end;}
+  .car-arrow.right{right:0; justify-content:flex-end;}
   .car-arrow:hover{color:var(--accent);}
   @media (hover:none){ .car-arrow{display:none;} }
   .section-title{
@@ -548,7 +550,7 @@
         <button class="hero-cta" id="heroCta" style="visibility:hidden;">▶ Ver serie</button>
       </div>
       <div class="hero-image-side" id="heroImageSide">
-        <div class="hero-poster"><div class="hero-poster-inner"><img id="heroPosterImg" alt=""></div></div>
+        <div class="hero-poster"><div class="hero-poster-inner"><img id="heroPosterImg" alt="" referrerpolicy="no-referrer"></div></div>
       </div>
     </div>
 
@@ -564,7 +566,7 @@
   <div id="detailView" class="detail">
     <button class="back-btn" id="backBtn">← Volver</button>
     <div class="detail-top">
-      <div class="detail-cover"><img id="detailCoverImg" alt=""></div>
+      <div class="detail-cover"><img id="detailCoverImg" alt="" referrerpolicy="no-referrer"></div>
       <div class="detail-info">
         <span class="status-badge" id="detailStatus">—</span>
         <h2 id="detailTitle">—</h2>
@@ -686,7 +688,7 @@
   </div>
   <div class="reader-body" id="readerBody">
     <div class="nav-zone left" id="prevPageZone">‹</div>
-    <img id="pageImg" alt="Página">
+    <img id="pageImg" alt="Página" referrerpolicy="no-referrer">
     <div class="nav-zone right" id="nextPageZone">›</div>
   </div>
   <div class="reader-bottom" id="pageCounter">— / —</div>
@@ -735,7 +737,7 @@ function mangaCardHtml(m){
   const title = escapeHtml(getTitle(attrs));
   const status = attrs.status ? attrs.status.toUpperCase() : "";
   return `<div class="card" data-id="${m.id}">
-    <div class="cover-wrap">${img ? `<img src="${img}" loading="lazy" alt="${title}">` : ""}</div>
+    <div class="cover-wrap">${img ? `<img src="${img}" loading="lazy" alt="${title}" referrerpolicy="no-referrer">` : ""}</div>
     <div class="info">
       <div class="title">${title}</div>
       <div class="meta">${status}</div>
@@ -841,7 +843,7 @@ function resumeCurrentManga(){
 
 function continueCardHtml(entry){
   return `<div class="card continue-card" data-manga-id="${entry.mangaId}" data-chapter-id="${entry.chapterId}" data-lang="${entry.lang}" data-page-index="${entry.pageIndex}">
-    <div class="cover-wrap">${entry.cover ? `<img src="${entry.cover}" loading="lazy" alt="">` : ""}</div>
+    <div class="cover-wrap">${entry.cover ? `<img src="${entry.cover}" loading="lazy" alt="" referrerpolicy="no-referrer">` : ""}</div>
     <div class="info">
       <div class="title">${escapeHtml(entry.title)}</div>
       <div class="meta">${escapeHtml(entry.chapterLabel)}</div>
@@ -851,7 +853,7 @@ function continueCardHtml(entry){
 
 function favoriteCardHtml(entry){
   return `<div class="card" data-id="${entry.mangaId}">
-    <div class="cover-wrap">${entry.cover ? `<img src="${entry.cover}" loading="lazy" alt="">` : ""}</div>
+    <div class="cover-wrap">${entry.cover ? `<img src="${entry.cover}" loading="lazy" alt="" referrerpolicy="no-referrer">` : ""}</div>
     <div class="info">
       <div class="title">${escapeHtml(entry.title)}</div>
       <div class="meta">Guardado</div>
