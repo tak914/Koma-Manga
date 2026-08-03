@@ -2,9 +2,8 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<meta name="referrer" content="no-referrer">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>KOMA — Lector de Manga</title>
+<title>MuzzaRella — Lector de Manga</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,700;1,300&display=swap" rel="stylesheet">
 <style>
@@ -46,24 +45,54 @@
     backdrop-filter:blur(10px);
     border-bottom:1px solid var(--border);
   }
+  header.hidden-in-reader{display:none;}
   .header-inner{
     max-width:1180px; margin:0 auto; padding:0 20px;
     display:flex; align-items:center; justify-content:space-between;
     padding-top:16px; padding-bottom:16px; gap:20px; flex-wrap:wrap;
   }
-  .logo{
-    font-family:'Bebas Neue',sans-serif;
-    font-size:2.4rem;
-    letter-spacing:2px;
-    line-height:1;
-    font-style:italic;
-    transform:skewX(-6deg);
-    display:inline-block;
-    color:var(--text);
-    cursor:pointer;
-    user-select:none;
+
+  
+
+  
+
+  /* Estilo base del logo */
+  .logo {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 2.4rem; /* Puedes cambiar a 1.5rem si lo quieres más pequeño */
+    font-weight: 800;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    letter-spacing: 2px;
+    line-height: 1;
+    font-style: italic;
+    transform: skewX(-6deg);
+    user-select: none;
+    color: #ffffff; /* Color base neutro/blanco */
   }
-  .logo span{color:var(--accent);}
+
+  /* "Muzza" en Naranja */
+  .muza {
+    color: #ff5a1f;
+    transition: color 0.3s ease;
+  }
+
+  /* "rella" en Amarillento (queso) */
+  .rella {
+    color: #ffb81f;
+    transition: color 0.3s ease;
+  }
+
+  /* Efecto de brillo al pasar el mouse */
+  .logo:hover .muza {
+    color: #ff711f;
+  }
+
+  .logo:hover .rella {
+    color: #ffcb1f;
+  }
   .searchbar{
     display:flex; flex:1; max-width:480px; min-width:240px;
     border:1px solid var(--border);
@@ -295,28 +324,127 @@
     flex-direction:column;
   }
   .reader.active{display:flex;}
-  .reader-top{
-    display:flex; align-items:center; justify-content:space-between;
-    padding:12px 18px; background:var(--surface); color:var(--text); flex-shrink:0;
-    font-family:'DM Sans',sans-serif; font-size:.82rem; gap:10px;
-    border-bottom:1px solid var(--border);
+  .reader-close-wrap{
+    position:absolute; top:16px; right:16px; z-index:61;
   }
-  .reader-top .r-title{
-    font-family:'Bebas Neue',sans-serif; font-style:italic; font-size:1.15rem; letter-spacing:1px; color:var(--accent);
-    overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:50vw;
+  .reader-float-controls{
+    position:absolute; top:70px; right:16px; z-index:60;
+    display:flex; flex-direction:column; gap:10px;
   }
-  .reader-top button{
+  .reader-fab{
+    width:44px; height:44px; border-radius:50%; flex-shrink:0;
+    background:rgba(10,12,10,0.6); backdrop-filter:blur(6px); -webkit-backdrop-filter:blur(6px);
+    border:1px solid rgba(255,255,255,0.14); color:var(--text);
+    display:flex; align-items:center; justify-content:center; cursor:pointer;
+    transition:background .15s, border-color .15s, color .15s, transform .1s;
+  }
+  .reader-fab svg{width:19px; height:19px;}
+  .reader-fab:hover{border-color:var(--accent); color:var(--accent); background:rgba(10,12,10,0.8);}
+  .reader-fab:active{transform:scale(.92);}
+  .reader-fab-close{color:var(--accent); border-color:rgba(255,90,20,0.35);}
+  .reader-fab-close:hover{background:rgba(255,90,20,0.18);}
+  .reader-close-wrap, .reader-float-controls{
+    transition:opacity .25s ease, visibility .25s ease;
+  }
+  .reader-bottom{
+    transition:opacity .2s ease, visibility .2s ease, max-height .25s ease, padding .25s ease, border-color .25s ease;
+  }
+  .reader.controls-hidden .reader-close-wrap,
+  .reader.controls-hidden .reader-float-controls{
+    opacity:0; visibility:hidden; pointer-events:none;
+  }
+  .reader.controls-hidden .reader-bottom{
+    opacity:0; visibility:hidden; pointer-events:none;
+    max-height:0; padding-top:0; padding-bottom:0; border-top-color:transparent;
+  }
+  .reader-progress{
+    height:4px; width:100%; background:rgba(255,255,255,0.08);
+    border-radius:2px; overflow:hidden; margin-bottom:8px; cursor:default;
+    direction:ltr;
+  }
+  .reader-progress.reader-progress-rtl{
+    direction:rtl;
+  }
+  .reader-progress-fill{
+    height:100%; width:0%; background:var(--accent); transition:width .25s ease;
+  }
+  .reader-settings-backdrop{
+    position:fixed; inset:0; z-index:65; background:rgba(0,0,0,0.55);
+    opacity:0; visibility:hidden; transition:opacity .2s, visibility .2s;
+  }
+  .reader-settings-backdrop.active{opacity:1; visibility:visible;}
+  .reader-settings-panel{
+    position:absolute; top:124px; right:16px; z-index:70; width:230px;
+    background:rgba(15,17,15,0.96); backdrop-filter:blur(10px); -webkit-backdrop-filter:blur(10px);
+    border:1px solid var(--border-strong); border-radius:10px; padding:16px;
+    display:flex; flex-direction:column; gap:10px;
+    opacity:0; visibility:hidden; transform:translateY(-8px); transition:opacity .18s, transform .18s, visibility .18s;
+  }
+  .reader-settings-panel.active{opacity:1; visibility:visible; transform:translateY(0);}
+  .reader-settings-panel .r-title{
+    font-family:'Bebas Neue',sans-serif; font-style:italic; font-size:1rem; letter-spacing:1px; color:var(--accent);
+    overflow:hidden; text-overflow:ellipsis; white-space:nowrap; padding-bottom:6px; border-bottom:1px solid var(--border);
+  }
+  .reader-settings-panel button{
     background:none; border:1px solid var(--border-strong); color:var(--text); font-family:'DM Sans',sans-serif; font-weight:500;
-    padding:6px 12px; cursor:pointer; font-size:.78rem; border-radius:4px;
+    padding:9px 12px; cursor:pointer; font-size:.78rem; border-radius:6px; width:100%;
   }
-  .reader-top button:hover{border-color:var(--accent); color:var(--accent);}
+  .reader-settings-panel button:hover{border-color:var(--accent); color:var(--accent);}
+  .reader-settings-chnav{display:flex; gap:8px;}
+  .reader-settings-chnav button{padding:9px 6px; font-size:.7rem;}
+  #closeReaderBtn{background:rgba(255,90,20,0.08); border-color:var(--accent); color:var(--accent);}
+  #closeReaderBtn:hover{background:var(--accent); color:#0a0500;}
+  @media (max-width:640px){
+    .reader-close-wrap{top:12px; right:12px;}
+    .reader-float-controls{top:60px; right:12px; gap:8px;}
+    .reader-fab{width:40px; height:40px;}
+    .reader-settings-panel{top:108px; right:12px; width:calc(100vw - 24px); max-width:280px;}
+  }
   .reader-body{
     flex:1; display:flex; align-items:center; justify-content:center; position:relative; overflow:hidden;
+    touch-action:none;
   }
-  .reader-body img{max-width:100%; max-height:100%; object-fit:contain; user-select:none;}
+  .page-wrap{
+    position:relative; width:100%; height:100%; display:flex; align-items:center; justify-content:center;
+  }
+  .reader-body img{
+    max-width:100%; max-height:100%; object-fit:contain; user-select:none;
+    opacity:0; transition:opacity .2s ease, transform .18s ease; position:relative; z-index:1;
+    transform-origin:center center;
+  }
+  .reader-body img.loaded{opacity:1;}
+  .reader-body.zoomed img{cursor:grab;}
+  .reader-body.dragging img{cursor:grabbing;}
+  .reader-body.dragging img, .reader-body.pinching img{transition:none;}
+  .page-skeleton{
+    display:none; position:absolute; inset:0; margin:auto; width:min(60%, 420px); aspect-ratio:2/3;
+    background:linear-gradient(100deg, var(--surface) 25%, rgba(255,90,20,0.10) 42%, var(--surface) 60%);
+    background-size:250% 100%;
+    animation:pageShimmer 1.4s ease-in-out infinite;
+    border-radius:6px; border:1px solid var(--border);
+    align-items:center; justify-content:center; flex-direction:column; gap:12px;
+    color:var(--muted);
+  }
+  .page-skeleton.active{display:flex;}
+  .page-skeleton .skeleton-icon{width:38px; height:38px; opacity:.35;}
+  .page-skeleton .skeleton-msg{font-family:'DM Sans',sans-serif; font-size:.78rem; opacity:.7; text-align:center; line-height:1.7;}
+  .page-skeleton.error{animation:none; background:var(--surface);}
+  .page-skeleton.error .skeleton-icon{display:none;}
+  .skeleton-retry-btn{
+    margin-top:6px; background:none; border:1px solid var(--border-strong); color:var(--text);
+    font-family:'DM Sans',sans-serif; font-weight:600; font-size:.76rem; letter-spacing:.3px;
+    padding:7px 18px; border-radius:5px; cursor:pointer; opacity:1;
+  }
+  .skeleton-retry-btn:hover{border-color:var(--accent); color:var(--accent);}
+  @keyframes pageShimmer{
+    0%{background-position:200% 0;}
+    100%{background-position:-100% 0;}
+  }
   .nav-zone{
-    position:absolute; top:0; bottom:0; width:35%; cursor:pointer;
+    position:absolute; top:0; bottom:0; width:35%; cursor:pointer; z-index:2;
     display:flex; align-items:center; opacity:0; transition:opacity .15s;
+  }
+  .nav-zone span{
     font-family:'Bebas Neue',sans-serif; font-style:italic; font-size:2rem; color:var(--text);
   }
   .nav-zone:hover{opacity:.5; background:rgba(0,0,0,.35);}
@@ -326,6 +454,7 @@
     padding:10px 18px; background:var(--surface); color:var(--muted); text-align:center;
     font-family:'DM Sans',sans-serif; font-size:.8rem; flex-shrink:0;
     border-top:1px solid var(--border);
+    max-height:60px; overflow:hidden;
   }
   footer{
     text-align:center; padding:30px 0 10px; font-family:'DM Sans',sans-serif;
@@ -348,6 +477,7 @@
     backdrop-filter:blur(4px); display:flex; align-items:center; justify-content:center;
   }
   .menu-toggle:hover{border-color:var(--accent); color:var(--accent);}
+  body.reader-open .menu-toggle{display:none !important;}
 
   /* ============ SIDEBAR OFFCANVAS ============ */
   .offcanvas{
@@ -508,7 +638,7 @@
 
 <aside id="sidebar" class="offcanvas">
   <div class="offcanvas-header">
-    <h2>こま<span style="color:var(--accent);">KOMA</span></h2>
+    <h2>こま<span style="color:var(--accent);">Rella</span></h2>
     <button id="sidebarClose" class="offcanvas-close" aria-label="Cerrar menú">✕</button>
   </div>
   <nav class="offcanvas-nav">
@@ -532,9 +662,14 @@
 
 <header>
   <div class="header-inner">
-    <div class="logo" id="logoBtn">こま<span>KOMA</span></div>
+    <div class="logo" id="logoBtn">
+      ピザ <span class="muza">Muzza</span><span class="rella">rella</span>
+    </div>
     <button type="button" class="search-trigger" id="searchTrigger" aria-label="Buscar manga">
-      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <circle cx="11" cy="11" r="8"/>
+        <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+      </svg>
     </button>
   </div>
 </header>
@@ -678,20 +813,47 @@
 </div>
 
 <div class="reader" id="reader">
-  <div class="reader-top">
+  <div class="reader-close-wrap">
+    <button id="closeReaderTopBtn" class="reader-fab reader-fab-close" title="Cerrar lector" aria-label="Cerrar lector">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6 6 18M6 6l12 12"/></svg>
+    </button>
+  </div>
+  <div class="reader-float-controls">
+    <button id="fullscreenBtn" class="reader-fab" title="Pantalla completa" aria-label="Pantalla completa">
+      <svg class="icon-expand" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 3H5a2 2 0 0 0-2 2v3M16 3h3a2 2 0 0 1 2 2v3M21 16v3a2 2 0 0 1-2 2h-3M8 21H5a2 2 0 0 1-2-2v-3"/></svg>
+      <svg class="icon-collapse" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:none;"><path d="M9 3v4a1 1 0 0 1-1 1H4M20 8h-4a1 1 0 0 1-1-1V3M15 21v-4a1 1 0 0 1 1-1h4M4 16h4a1 1 0 0 1 1 1v4"/></svg>
+    </button>
+    <button id="readerSettingsBtn" class="reader-fab" title="Configuración" aria-label="Configuración">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+    </button>
+  </div>
+
+  <div id="readerSettingsPanel" class="reader-settings-panel">
     <div class="r-title" id="readerTitle">—</div>
-    <div style="display:flex; gap:8px;">
+    <button id="readerDirBtn" title="Cambiar dirección de lectura"></button>
+    <div class="reader-settings-chnav">
       <button id="prevChBtn">‹ CAP. ANTERIOR</button>
-      <button id="closeReaderBtn">CERRAR ✕</button>
       <button id="nextChBtn">CAP. SIGUIENTE ›</button>
     </div>
+    <button id="closeReaderBtn">CERRAR LECTOR ✕</button>
   </div>
+  <div id="readerSettingsBackdrop" class="reader-settings-backdrop"></div>
+
   <div class="reader-body" id="readerBody">
-    <div class="nav-zone left" id="prevPageZone">‹</div>
-    <img id="pageImg" alt="Página" referrerpolicy="no-referrer">
-    <div class="nav-zone right" id="nextPageZone">›</div>
+    <div class="nav-zone left" id="prevPageZone"><span></span></div>
+    <div class="page-wrap">
+      <div class="page-skeleton" id="pageSkeleton">
+        <svg class="skeleton-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3"><path d="M6 2h9l5 5v13a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2z"/><polyline points="15 2 15 7 20 7"/></svg>
+        <span class="skeleton-msg"></span>
+      </div>
+      <img id="pageImg" alt="Página">
+    </div>
+    <div class="nav-zone right" id="nextPageZone"><span></span></div>
   </div>
-  <div class="reader-bottom" id="pageCounter">— / —</div>
+  <div class="reader-bottom" id="readerBottom">
+    <div class="reader-progress"><div class="reader-progress-fill" id="readerProgressFill"></div></div>
+    <div id="pageCounter">— / —</div>
+  </div>
 </div>
 
 <footer class="app">Datos e imágenes proporcionados por la API pública de MangaDex. KOMA no aloja ningún contenido.</footer>
@@ -701,11 +863,22 @@
 // const API = "https://mangadex-proxy.tu-usuario.workers.dev";
 const API = "https://koma-proxy.muzasanti628.workers.dev";
 
+// Las imágenes de página @Home NO pasan por aquí directo (mangadex.network puede estar
+// bloqueado en tu red); las hacemos pasar por la ruta /img del worker, que sí llega
+// al nodo desde el edge de Cloudflare. Guardamos siempre la URL @Home "real" (sin proxiar)
+// en currentPages/currentPagesSaver, porque esa es la que hay que reportar a la red @Home
+// (reportAtHome) y la que sirve como clave de preloadCache; solo la envolvemos con esto
+// justo antes de asignarla a un <img>/Image().
+function proxiedImageUrl(realUrl){
+  return `${API}/img?url=${encodeURIComponent(realUrl)}`;
+}
+
 // ---------- state ----------
 let currentMangaId = null;
 let currentChapters = [];
 let currentChapterIndex = -1;
 let currentPages = [];
+let currentPagesSaver = []; // fallback: versión comprimida (dataSaver) de cada página
 let currentPageIndex = 0;
 
 // ---------- helpers ----------
@@ -877,9 +1050,7 @@ async function resumeReading(entry){
   await openManga(entry.mangaId);
   const idx = currentChapters.findIndex(ch => ch.id === entry.chapterId);
   if(idx >= 0){
-    await openReader(idx);
-    currentPageIndex = Math.min(entry.pageIndex, Math.max(currentPages.length - 1, 0));
-    showPage();
+    await openReader(idx, entry.pageIndex);
   }
 }
 
@@ -1150,42 +1321,278 @@ async function loadChapters(mangaId, lang){
 }
 
 // ---------- reader ----------
+const LS_READING_DIR = "koma_reading_direction";
+let readingDirection = localStorage.getItem(LS_READING_DIR) || "rtl"; // "rtl" = manga (por defecto), "ltr" = occidental
+const preloadCache = {};
+let pageLoadToken = 0;
+
+function isRTL(){ return readingDirection === "rtl"; }
+
+function preloadPage(url){
+  if(!url || preloadCache[url]) return;
+  const im = new Image();
+  im.src = proxiedImageUrl(url);
+  preloadCache[url] = im;
+}
+
+function preloadNeighbors(){
+  preloadPage(currentPages[currentPageIndex + 1]);
+  preloadPage(currentPages[currentPageIndex + 2]);
+  preloadPage(currentPages[currentPageIndex - 1]);
+}
+
+function updateReaderDirectionUI(){
+  const dirBtn = document.getElementById("readerDirBtn");
+  const leftZone = document.getElementById("prevPageZone");
+  const rightZone = document.getElementById("nextPageZone");
+  document.querySelector(".reader-progress").classList.toggle("reader-progress-rtl", isRTL());
+
+  if(isRTL()){
+    dirBtn.textContent = "📖 MANGA (← )";
+    dirBtn.title = "Leyendo de derecha a izquierda (estilo manga). Click para cambiar a occidental.";
+    leftZone.dataset.action = "next";
+    rightZone.dataset.action = "prev";
+    leftZone.querySelector("span").textContent = "‹";
+    rightZone.querySelector("span").textContent = "›";
+    leftZone.title = "Página siguiente";
+    rightZone.title = "Página anterior";
+  } else {
+    dirBtn.textContent = "📖 OCCIDENTAL ( →)";
+    dirBtn.title = "Leyendo de izquierda a derecha (estilo occidental). Click para cambiar a manga.";
+    leftZone.dataset.action = "prev";
+    rightZone.dataset.action = "next";
+    leftZone.querySelector("span").textContent = "‹";
+    rightZone.querySelector("span").textContent = "›";
+    leftZone.title = "Página anterior";
+    rightZone.title = "Página siguiente";
+  }
+}
+
+function toggleReadingDirection(){
+  readingDirection = isRTL() ? "ltr" : "rtl";
+  localStorage.setItem(LS_READING_DIR, readingDirection);
+  updateReaderDirectionUI();
+}
+
 async function openReader(index, startPage){
   if(index < 0 || index >= currentChapters.length) return;
   currentChapterIndex = index;
   const ch = currentChapters[index];
   const reader = document.getElementById("reader");
   reader.classList.add("active");
+  reader.classList.toggle("controls-hidden", !!document.fullscreenElement);
+  document.body.classList.add("reader-open");
   document.body.style.overflow = "hidden";
+  document.querySelector("header").classList.add("hidden-in-reader");
+  closeReaderSettingsPanel();
+  updateReaderDirectionUI();
+  resetZoom();
 
   const a = ch.attributes;
   const num = a.chapter ? `Cap. ${a.chapter}` : "Oneshot";
   document.getElementById("readerTitle").textContent = `${num}${a.title ? " — " + a.title : ""}`;
   document.getElementById("pageCounter").textContent = "Cargando páginas…";
-  document.getElementById("pageImg").src = "";
+  const img = document.getElementById("pageImg");
+  img.classList.remove("loaded");
+  img.src = "";
+  const skeleton = document.getElementById("pageSkeleton");
+  skeleton.classList.add("active");
+  skeleton.classList.remove("error");
+  skeleton.querySelector(".skeleton-msg").textContent = "Cargando…";
 
   try{
-    const res = await fetch(`${API}/at-home/server/${ch.id}`);
+    // cache:"no-store" también en la carga inicial: una sesión @Home cacheada por
+    // el navegador puede estar vencida aunque no haya habido ningún error todavía.
+    const res = await fetch(`${API}/at-home/server/${ch.id}`, { cache: "no-store" });
     const data = await res.json();
     const base = data.baseUrl;
     const hash = data.chapter.hash;
+    lastAtHomeBaseUrl = base;
     currentPages = data.chapter.data.map(f => `${base}/data/${hash}/${f}`);
+    currentPagesSaver = (data.chapter.dataSaver || []).map(f => `${base}/data-saver/${hash}/${f}`);
     currentPageIndex = (typeof startPage === "number" && startPage >= 0 && startPage < currentPages.length)
       ? startPage : 0;
     showPage();
   }catch(e){
     document.getElementById("pageCounter").textContent = "Error al cargar las páginas.";
+    skeleton.classList.add("error");
+    skeleton.querySelector(".skeleton-msg").textContent = "No se pudieron cargar las páginas.";
   }
 }
 
 function showPage(){
   if(!currentPages.length) return;
-  document.getElementById("pageImg").src = currentPages[currentPageIndex];
+  const token = ++pageLoadToken;
+  const url = currentPages[currentPageIndex];
+  const img = document.getElementById("pageImg");
+  const skeleton = document.getElementById("pageSkeleton");
+
+  resetZoom();
+  img.classList.remove("loaded");
+  skeleton.classList.remove("error");
+  skeleton.classList.add("active");
+  skeleton.querySelector(".skeleton-msg").textContent = "Cargando…";
+
+  loadPageImage(url, token, img, skeleton, 0, "data");
+
   document.getElementById("pageCounter").textContent = `Página ${currentPageIndex+1} / ${currentPages.length}`;
+  document.getElementById("readerProgressFill").style.width = `${((currentPageIndex+1)/currentPages.length)*100}%`;
   saveProgress();
   if(currentPageIndex === currentPages.length - 1){
     const ch = currentChapters[currentChapterIndex];
     if(ch) markChapterRead(ch.id);
+  }
+  preloadNeighbors();
+}
+
+const PAGE_MAX_RETRIES = 2;
+const PAGE_RETRY_DELAY = 900; // ms, aumenta un poco en cada intento
+let lastAtHomeBaseUrl = null; // nodo/mirror @Home asignado en la última sesión obtenida
+
+// Le avisa a la red MangaDex@Home si una página cargó bien o falló.
+// Esto es parte del protocolo oficial: si no se reporta, el balanceador
+// puede seguir mandando clientes al mismo nodo caído/corrupto.
+function reportAtHome(url, success, bytes, durationMs){
+  try{
+    // OJO: api.mangadex.network vive en el mismo dominio (mangadex.network) que los
+    // nodos @Home. Si ese dominio está bloqueado en tu red, este fetch fallaría igual
+    // que fallaban las imágenes — por eso también pasa por el worker (ruta /report),
+    // que debe reenviar el body tal cual a https://api.mangadex.network/report.
+    fetch(`${API}/report`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        url,
+        success,
+        bytes: bytes || 0,
+        duration: Math.max(1, Math.round(durationMs || 0)),
+        cached: false
+      })
+    }).catch(() => {});
+  }catch(e){ /* no bloquear la UI por esto */ }
+}
+
+// Vuelve a pedir la sesión @Home para el capítulo actual (nuevo nodo espejo / caché fresco).
+// Necesario porque una URL @Home vieja puede empezar a devolver 404 cuando el nodo la purga.
+// Usamos cache:"no-store" porque si no, el navegador puede reusar la respuesta anterior
+// (mismo nodo) en vez de pedirle a MangaDex una asignación nueva.
+const REFRESH_SAME_NODE_RETRIES = 2; // intentos extra si nos reasignan el mismo nodo caído
+
+async function refreshChapterSession(attempt = 0){
+  const ch = currentChapters[currentChapterIndex];
+  if(!ch) return false;
+  try{
+    const res = await fetch(`${API}/at-home/server/${ch.id}`, { cache: "no-store" });
+    const data = await res.json();
+    const base = data.baseUrl;
+    const hash = data.chapter.hash;
+
+    // MangaDex a veces reasigna el mismo mirror que ya venía fallando. Si eso pasa,
+    // pedimos otra sesión más (hasta REFRESH_SAME_NODE_RETRIES veces) antes de darnos
+    // por vencidos con este nodo y pasar al fallback de data-saver.
+    if(base === lastAtHomeBaseUrl && attempt < REFRESH_SAME_NODE_RETRIES){
+      console.warn(`[KOMA] La API reasignó el mismo nodo @Home (${base}); reintentando sesión nueva (${attempt + 1}/${REFRESH_SAME_NODE_RETRIES})…`);
+      return refreshChapterSession(attempt + 1);
+    }
+
+    lastAtHomeBaseUrl = base;
+    currentPages = data.chapter.data.map(f => `${base}/data/${hash}/${f}`);
+    currentPagesSaver = (data.chapter.dataSaver || []).map(f => `${base}/data-saver/${hash}/${f}`);
+    return true;
+  }catch(e){
+    console.error("[KOMA] No se pudo renovar la sesión @Home:", e);
+    return false;
+  }
+}
+
+// stage: "data" (calidad original, primer intento) -> "refreshed" (calidad original,
+// tras pedir sesión @Home nueva) -> "saver" (versión comprimida, último recurso antes del error).
+function loadPageImage(url, token, img, skeleton, attempt, stage){
+  if(token !== pageLoadToken) return;
+  const startedAt = performance.now();
+
+  const slowTimer = setTimeout(() => {
+    if(token !== pageLoadToken) return;
+    skeleton.querySelector(".skeleton-msg").textContent = "Tardando más de lo normal, espera un poco…";
+  }, 5000);
+
+  const loader = new Image();
+  loader.onload = () => {
+    clearTimeout(slowTimer);
+    reportAtHome(url, true, 0, performance.now() - startedAt);
+    if(token !== pageLoadToken) return;
+    img.src = proxiedImageUrl(url);
+    img.classList.add("loaded");
+    skeleton.classList.remove("active");
+  };
+  loader.onerror = (ev) => {
+    clearTimeout(slowTimer);
+    reportAtHome(url, false, 0, performance.now() - startedAt);
+    if(token !== pageLoadToken) return;
+    console.error(`[KOMA] Falló la carga de página (${stage}, intento ${attempt + 1}):`, url, ev);
+
+    if(attempt < PAGE_MAX_RETRIES){
+      skeleton.querySelector(".skeleton-msg").textContent = `Reintentando… (${attempt + 1}/${PAGE_MAX_RETRIES})`;
+      setTimeout(() => loadPageImage(url, token, img, skeleton, attempt + 1, stage), PAGE_RETRY_DELAY * (attempt + 1));
+      return;
+    }
+
+    if(stage === "data"){
+      // La URL puede haber quedado obsoleta (404 persistente = nodo caducado). Pedimos una sesión nueva.
+      skeleton.querySelector(".skeleton-msg").textContent = "Renovando conexión con el servidor…";
+      refreshChapterSession().then(ok => {
+        if(token !== pageLoadToken) return;
+        const freshUrl = currentPages[currentPageIndex];
+        if(ok && freshUrl){
+          loadPageImage(freshUrl, token, img, skeleton, 0, "refreshed");
+        } else {
+          tryPageSaverFallback(token, img, skeleton);
+        }
+      });
+      return;
+    }
+
+    if(stage === "refreshed"){
+      // El nodo nuevo también falló para esta página puntual: probamos la versión
+      // comprimida (dataSaver), que a veces vive en una ruta/nodo distinto.
+      tryPageSaverFallback(token, img, skeleton);
+      return;
+    }
+
+    showPageFinalError(skeleton, img, token);
+  };
+  loader.src = proxiedImageUrl(url);
+  console.log(`[KOMA] Solicitando página (${stage}, intento ${attempt + 1}):`, url);
+  preloadCache[url] = loader;
+}
+
+function tryPageSaverFallback(token, img, skeleton){
+  if(token !== pageLoadToken) return;
+  const saverUrl = currentPagesSaver[currentPageIndex];
+  if(!saverUrl){
+    showPageFinalError(skeleton, img, token);
+    return;
+  }
+  skeleton.querySelector(".skeleton-msg").textContent = "Probando versión comprimida…";
+  loadPageImage(saverUrl, token, img, skeleton, 0, "saver");
+}
+
+function showPageFinalError(skeleton, img, token){
+  skeleton.classList.add("error");
+  skeleton.querySelector(".skeleton-msg").innerHTML =
+    `Error al cargar esta página.<br><button class="skeleton-retry-btn" type="button">Reintentar</button>`;
+  const retryBtn = skeleton.querySelector(".skeleton-retry-btn");
+  if(retryBtn){
+    retryBtn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      if(token !== pageLoadToken) return;
+      skeleton.classList.remove("error");
+      skeleton.querySelector(".skeleton-msg").textContent = "Cargando…";
+      refreshChapterSession().then(ok => {
+        const freshUrl = currentPages[currentPageIndex];
+        loadPageImage(freshUrl, token, img, skeleton, 0, "refreshed");
+      });
+    });
   }
 }
 
@@ -1210,7 +1617,11 @@ function prevPage(){
 }
 function closeReader(){
   document.getElementById("reader").classList.remove("active");
+  document.body.classList.remove("reader-open");
   document.body.style.overflow = "";
+  document.querySelector("header").classList.remove("hidden-in-reader");
+  closeReaderSettingsPanel();
+  if(document.fullscreenElement) document.exitFullscreen().catch(() => {});
 }
 
 // ---------- events ----------
@@ -1234,17 +1645,212 @@ document.getElementById("resumeBtn").addEventListener("click", resumeCurrentMang
 document.getElementById("langSelect").addEventListener("change", (e) => {
   if(currentMangaId) loadChapters(currentMangaId, e.target.value);
 });
-document.getElementById("prevPageZone").addEventListener("click", prevPage);
-document.getElementById("nextPageZone").addEventListener("click", nextPage);
+document.getElementById("prevPageZone").addEventListener("click", (e) => {
+  if(zoomLevel > 1.02) return;
+  if(didDrag){ didDrag = false; return; }
+  e.currentTarget.dataset.action === "next" ? nextPage() : prevPage();
+});
+document.getElementById("nextPageZone").addEventListener("click", (e) => {
+  if(zoomLevel > 1.02) return;
+  if(didDrag){ didDrag = false; return; }
+  e.currentTarget.dataset.action === "next" ? nextPage() : prevPage();
+});
+document.getElementById("readerDirBtn").addEventListener("click", toggleReadingDirection);
 document.getElementById("prevChBtn").addEventListener("click", () => openReader(currentChapterIndex - 1));
 document.getElementById("nextChBtn").addEventListener("click", () => openReader(currentChapterIndex + 1));
 document.getElementById("closeReaderBtn").addEventListener("click", closeReader);
+document.getElementById("closeReaderTopBtn").addEventListener("click", closeReader);
+
+// ---------- controles flotantes del reader: fullscreen + configuración ----------
+function openReaderSettingsPanel(){
+  document.getElementById("readerSettingsPanel").classList.add("active");
+  document.getElementById("readerSettingsBackdrop").classList.add("active");
+}
+function closeReaderSettingsPanel(){
+  document.getElementById("readerSettingsPanel").classList.remove("active");
+  document.getElementById("readerSettingsBackdrop").classList.remove("active");
+}
+function toggleReaderSettingsPanel(){
+  const panel = document.getElementById("readerSettingsPanel");
+  panel.classList.contains("active") ? closeReaderSettingsPanel() : openReaderSettingsPanel();
+}
+document.getElementById("readerSettingsBtn").addEventListener("click", (e) => {
+  e.stopPropagation();
+  toggleReaderSettingsPanel();
+});
+document.getElementById("readerSettingsBackdrop").addEventListener("click", closeReaderSettingsPanel);
+
+function updateFullscreenIcon(){
+  const btn = document.getElementById("fullscreenBtn");
+  const isFs = !!document.fullscreenElement;
+  btn.querySelector(".icon-expand").style.display = isFs ? "none" : "";
+  btn.querySelector(".icon-collapse").style.display = isFs ? "" : "none";
+  btn.title = isFs ? "Salir de pantalla completa" : "Pantalla completa";
+}
+document.getElementById("fullscreenBtn").addEventListener("click", () => {
+  if(!document.fullscreenElement){
+    document.getElementById("reader").requestFullscreen().catch(() => {});
+  } else {
+    document.exitFullscreen().catch(() => {});
+  }
+});
+document.addEventListener("fullscreenchange", () => {
+  updateFullscreenIcon();
+  const reader = document.getElementById("reader");
+  reader.classList.toggle("controls-hidden", !!document.fullscreenElement);
+});
+
+// ---------- zoom & pan (PC y mobil) ----------
+let zoomLevel = 1;
+let panX = 0, panY = 0;
+let didDrag = false;
+let isMouseDown = false;
+let dragStartX = 0, dragStartY = 0;
+let pinchStartDist = 0, pinchStartZoom = 1;
+let lastTapTime = 0;
+
+const readerBodyEl = document.getElementById("readerBody");
+const pageImgEl = document.getElementById("pageImg");
+
+function applyZoomTransform(){
+  pageImgEl.style.transform = `translate(${panX}px, ${panY}px) scale(${zoomLevel})`;
+  readerBodyEl.classList.toggle("zoomed", zoomLevel > 1.02);
+}
+
+function clampPan(){
+  const rect = readerBodyEl.getBoundingClientRect();
+  const w = pageImgEl.offsetWidth * zoomLevel;
+  const h = pageImgEl.offsetHeight * zoomLevel;
+  const maxX = Math.max((w - rect.width) / 2, 0);
+  const maxY = Math.max((h - rect.height) / 2, 0);
+  panX = Math.min(maxX, Math.max(-maxX, panX));
+  panY = Math.min(maxY, Math.max(-maxY, panY));
+}
+
+function setZoom(newZoom, instant){
+  zoomLevel = Math.min(4, Math.max(1, newZoom));
+  if(zoomLevel <= 1.02){ zoomLevel = 1; panX = 0; panY = 0; }
+  readerBodyEl.classList.toggle("pinching", !!instant);
+  clampPan();
+  applyZoomTransform();
+}
+
+function resetZoom(){
+  zoomLevel = 1; panX = 0; panY = 0;
+  readerBodyEl.classList.remove("zoomed", "dragging", "pinching");
+  pageImgEl.style.transform = "";
+}
+
+function toggleZoomTap(){
+  setZoom(zoomLevel > 1.02 ? 1 : 2.4);
+}
+
+// Rueda del mouse: zoom in/out (PC)
+readerBodyEl.addEventListener("wheel", (e) => {
+  if(!document.getElementById("reader").classList.contains("active")) return;
+  e.preventDefault();
+  const factor = e.deltaY < 0 ? 1.15 : 1 / 1.15;
+  setZoom(zoomLevel * factor);
+}, { passive:false });
+
+// Doble click (PC): alterna zoom
+pageImgEl.addEventListener("dblclick", (e) => {
+  e.preventDefault();
+  toggleZoomTap();
+});
+
+// Arrastre con mouse cuando hay zoom (PC)
+pageImgEl.addEventListener("mousedown", (e) => {
+  if(zoomLevel <= 1.02) return;
+  e.preventDefault();
+  isMouseDown = true;
+  didDrag = false;
+  dragStartX = e.clientX - panX;
+  dragStartY = e.clientY - panY;
+  readerBodyEl.classList.add("dragging");
+});
+window.addEventListener("mousemove", (e) => {
+  if(!isMouseDown) return;
+  const nx = e.clientX - dragStartX;
+  const ny = e.clientY - dragStartY;
+  if(Math.abs(nx - panX) > 3 || Math.abs(ny - panY) > 3) didDrag = true;
+  panX = nx; panY = ny;
+  clampPan();
+  applyZoomTransform();
+});
+window.addEventListener("mouseup", () => {
+  isMouseDown = false;
+  readerBodyEl.classList.remove("dragging");
+});
+
+// Click en el centro de la imagen: mostrar/ocultar controles en pantalla completa
+pageImgEl.addEventListener("click", () => {
+  if(didDrag){ didDrag = false; return; }
+  if(zoomLevel > 1.02) return;
+  toggleReaderControls();
+});
+
+// Pellizco (pinch) y arrastre táctil (mobil)
+function touchDist(t1, t2){
+  return Math.hypot(t1.clientX - t2.clientX, t1.clientY - t2.clientY);
+}
+
+readerBodyEl.addEventListener("touchstart", (e) => {
+  didDrag = false;
+  if(e.touches.length === 2){
+    pinchStartDist = touchDist(e.touches[0], e.touches[1]);
+    pinchStartZoom = zoomLevel;
+  } else if(e.touches.length === 1){
+    if(zoomLevel > 1.02){
+      dragStartX = e.touches[0].clientX - panX;
+      dragStartY = e.touches[0].clientY - panY;
+    }
+    const now = Date.now();
+    if(now - lastTapTime < 300){
+      toggleZoomTap();
+      lastTapTime = 0;
+    } else {
+      lastTapTime = now;
+    }
+  }
+}, { passive:true });
+
+readerBodyEl.addEventListener("touchmove", (e) => {
+  if(e.touches.length === 2){
+    e.preventDefault();
+    const dist = touchDist(e.touches[0], e.touches[1]);
+    didDrag = true;
+    setZoom(pinchStartZoom * (dist / pinchStartDist), true);
+  } else if(e.touches.length === 1 && zoomLevel > 1.02){
+    e.preventDefault();
+    const nx = e.touches[0].clientX - dragStartX;
+    const ny = e.touches[0].clientY - dragStartY;
+    if(Math.abs(nx - panX) > 3 || Math.abs(ny - panY) > 3) didDrag = true;
+    panX = nx; panY = ny;
+    clampPan();
+    applyZoomTransform();
+  }
+}, { passive:false });
+
+readerBodyEl.addEventListener("touchend", (e) => {
+  readerBodyEl.classList.remove("pinching");
+  if(e.touches.length === 0 && zoomLevel <= 1.02) setZoom(1);
+});
+
+// ---------- mostrar/ocultar controles del lector en pantalla completa ----------
+function toggleReaderControls(){
+  if(!document.fullscreenElement) return;
+  document.getElementById("reader").classList.toggle("controls-hidden");
+}
 
 document.addEventListener("keydown", (e) => {
   if(!document.getElementById("reader").classList.contains("active")) return;
-  if(e.key === "ArrowRight") nextPage();
-  if(e.key === "ArrowLeft") prevPage();
-  if(e.key === "Escape") closeReader();
+  if(e.key === "ArrowRight") isRTL() ? prevPage() : nextPage();
+  if(e.key === "ArrowLeft") isRTL() ? nextPage() : prevPage();
+  if(e.key === "Escape"){
+    if(document.getElementById("readerSettingsPanel").classList.contains("active")) closeReaderSettingsPanel();
+    else closeReader();
+  }
 });
 
 // ---------- sidebar (offcanvas, desktop) ----------
